@@ -1,1 +1,23 @@
-
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>قطع غيار الاستاذ</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}body{background:#0f0f0f;color:#fff}header{background:#d40000;padding:12px;display:flex;justify-content:space-between;align-items:center}#cartBtn{background:#fff;color:#d40000;padding:6px 14px;border-radius:20px;border:none;font-weight:bold}.search{padding:15px}input{width:100%;padding:13px;border-radius:25px;border:none;background:#222;color:#fff;text-align:center}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}.card{background:#1e1e1e;border-radius:15px;padding:10px;text-align:center}img{width:100%;height:120px;object-fit:cover;border-radius:10px;background:#333}.price{color:#ffcc00;font-weight:bold}.addBtn{background:#25D366;color:#fff;border:none;width:100%;padding:8px;border-radius:20px}#cartPage{position:fixed;inset:0;background:#111;z-index:200;display:none;padding:20px;overflow:auto}</style>
+</head><body>
+<header><h1>🏍️ قطع غيار الاستاذ</h1><button id="cartBtn" onclick="openCart()">🛒 (<span id="count">0</span>)</button></header>
+<div class="search"><input id="search" placeholder="دور على قطعة..." oninput="filterParts()"></div>
+<div style="text-align:center;color:#aaa">📍 LOCATION - توصيل لكل البحر الاحمر</div>
+<div class="grid" id="grid"></div>
+<div id="cartPage"><h2>🛒 السلة</h2><div id="cartItems"></div><h3>الاجمالي: <span id="total">0</span>ج</h3><br><input id="custName" placeholder="اسمك"><br><br><input id="custPhone" placeholder="رقمك"><br><br><input id="custAddress" placeholder="عنوانك"><br><br><button onclick="placeOrder()" style="background:#d40000;color:#fff;width:100%;padding:14px;border:none;border-radius:25px;font-weight:bold">اطلب واتساب</button><button onclick="closeCart()" style="background:#333;color:#fff;width:100%;padding:12px;border:none;border-radius:25px;margin-top:8px">رجوع</button></div>
+<script>
+// ===== عدل هنا =====
+const ADMIN_PHONE = "2XXXXXXXXXX"; // حط رقمك بعد +2
+// ===================
+let allParts=[],cart=JSON.parse(localStorage.getItem('cart')||'[]');
+async function load(){let r=await fetch('/api/parts');allParts=await r.json();render(allParts);updateCount();}
+function render(p){grid.innerHTML=p.map(x=>`<div class="card"><img src="${x.image}"><h3>${x.name}</h3><div class="price">${x.price}ج</div><button class="addBtn" onclick="addToCart(${x.id})">اضافة</button></div>`).join('');}
+function filterParts(){render(allParts.filter(p=>p.name.includes(search.value)));}
+function addToCart(id){cart.push(allParts.find(p=>p.id==id));localStorage.setItem('cart',JSON.stringify(cart));updateCount();alert('اتضاف');}
+function updateCount(){count.innerText=cart.length;}
+function openCart(){cartPage.style.display='block';cartItems.innerHTML=cart.map((c,i)=>`<div style="background:#222;padding:8px;margin:5px 0;border-radius:8px;display:flex;justify-content:space-between"><span>${c.name}</span><button onclick="cart.splice(${i},1);localStorage.setItem('cart',JSON.stringify(cart));openCart();updateCount()" style="background:red;color:#fff;border:none;padding:3px 8px;border-radius:10px">x</button></div>`).join('');total.innerText=cart.reduce((s,c)=>s+parseInt(c.price),0);}
+function closeCart(){cartPage.style.display='none';}
+async function placeOrder(){let totalVal=cart.reduce((s,c)=>s+parseInt(c.price),0);let payload={customerName:custName.value,customerPhone:custPhone.value,address:custAddress.value,items:cart,total:totalVal};await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});let txt=`طلب جديد - قطع غيار الاستاذ%0A👤 ${payload.customerName}%0A📞 ${payload.customerPhone}%0A📍 ${payload.address}%0A${cart.map(c=>`- ${c.name}`).join('%0A')}%0Aالاجمالي ${totalVal}ج`;window.open(`https://wa.me/${ADMIN_PHONE}?text=${txt}`,'_blank');cart=[];localStorage.removeItem('cart');closeCart();load();}
+load();
+</script></body></html>
