@@ -20,4 +20,43 @@ function openCart(){cartPage.style.display='block';cartItems.innerHTML=cart.map(
 function closeCart(){cartPage.style.display='none';}
 async function placeOrder(){let totalVal=cart.reduce((s,c)=>s+parseInt(c.price),0);let payload={customerName:custName.value,customerPhone:custPhone.value,address:custAddress.value,items:cart,total:totalVal};await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});let txt=`طلب جديد - قطع غيار الاستاذ%0A👤 ${payload.customerName}%0A📞 ${payload.customerPhone}%0A📍 ${payload.address}%0A${cart.map(c=>`- ${c.name}`).join('%0A')}%0Aالاجمالي ${totalVal}ج`;window.open(`https://wa.me/${ADMIN_PHONE}?text=${txt}`,'_blank');cart=[];localStorage.removeItem('cart');closeCart();load();}
 load();
-</script></body></html>
+</script></body><!-- ===== العلامة المائية - تصميم شقاوة ===== -->
+<style>
+.watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none; /* عشان متمنعش الضغط */
+  overflow: hidden;
+  opacity: 0.07;
+}
+.watermark span {
+  position: absolute;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  transform: rotate(-30deg);
+  white-space: nowrap;
+  font-family: sans-serif;
+}
+</style>
+<div class="watermark" id="watermark"></div>
+
+<script>
+// ===== عدل هنا اسمك ورقمك =====
+const DESIGNER_NAME = "المصمم شقاوة";
+const DESIGNER_PHONE = "01125917685"; // حط رقمك هنا
+// ===============================
+
+const container = document.getElementById('watermark');
+for(let y = -100; y < window.innerHeight + 300; y += 120){
+  for(let x = -200; x < window.innerWidth + 300; x += 300){
+    let s = document.createElement('span');
+    s.style.left = x + 'px';
+    s.style.top = y + 'px';
+    s.innerText = `${DESIGNER_NAME} - ${DESIGNER_PHONE}`;
+    container.appendChild(s);
+  }
+}
+</script>
+<!-- ===== نهاية العلامة المائية ===== --></html>
